@@ -1,3 +1,4 @@
+import { Box } from '@chakra-ui/react';
 import { GetServerSideProps, NextPage } from 'next';
 import MovieDetail from '../../src/components/Movies/MovieDetail';
 import RecommendMovies from '../../src/components/Movies/Section/Recommend';
@@ -27,7 +28,9 @@ const MovieDetailPage: NextPage<MovieDetailProps> = ({
                 runtime={movieDetail.runtime}
                 voteAverage={movieDetail.vote_average}
             />
-            <RecommendMovies recommendMovie={recommendMovie?.results} />
+            <Box px={4}>
+                <RecommendMovies recommendMovie={recommendMovie?.results} />
+            </Box>
         </Layout>
     );
 };

@@ -1,8 +1,7 @@
 import { StarIcon } from '@chakra-ui/icons';
-import { Box, Heading, Stack, Text } from '@chakra-ui/react';
+import { Box, Stack, Text } from '@chakra-ui/react';
 import Image from 'next/image';
 import Link from 'next/link';
-// import Image from 'next/image';
 
 const MovieItem: React.FC<any> = ({ movie }) => {
     return (
@@ -14,8 +13,9 @@ const MovieItem: React.FC<any> = ({ movie }) => {
                     width={'150px'}
                     _hover={{
                         background: '#000',
-                        opacity: '0.3',
+                        opacity: '0.7',
                     }}
+                    pos={'relative'}
                 >
                     <Image
                         width='300'
@@ -28,30 +28,33 @@ const MovieItem: React.FC<any> = ({ movie }) => {
                         alt={movie.title}
                         unoptimized
                     />
-                    <Stack
-                        pos='relative'
-                        mt={-20}
-                        align={'center'}
-                        textAlign={'center'}
+                    <Text
+                        bgColor={'rgba(0, 0, 0, .5)'}
+                        color={'#fff'}
+                        fontSize='md'
+                        mt={0}
+                        pos={'absolute'}
+                        top={2}
+                        left={2}
+                        px={1.5}
+                        rounded='lg'
                     >
-                        <Heading
-                            fontSize={'l'}
-                            fontFamily={'body'}
-                            fontWeight={500}
-                            color='#fff'
-                        >
-                            {movie.title}
-                        </Heading>
-                        <Text color={'#C1C1C1'} fontSize='xs' mt={0}>
-                            {new Date(movie.release_date).getFullYear()} |{' '}
-                            {/* {movie.genres[0].name} */}
+                        {new Date(movie.release_date).getFullYear()}
+                    </Text>
+                    <Stack
+                        direction={'row'}
+                        align={'center'}
+                        pos={'absolute'}
+                        top={2}
+                        right={2}
+                        px={1.5}
+                        bgColor={'rgba(0, 0, 0, .5)'}
+                        rounded={'lg'}
+                    >
+                        <StarIcon color='gold' />
+                        <Text color={'#fff'}>
+                            {Number(movie.vote_average).toFixed(1)}
                         </Text>
-                        <Stack direction={'row'} align={'center'}>
-                            <StarIcon color='gold' />
-                            <Text color={'#fff'}>
-                                {Number(movie.vote_average).toFixed(1)}
-                            </Text>
-                        </Stack>
                     </Stack>
                 </Box>
             </a>

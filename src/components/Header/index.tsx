@@ -1,10 +1,13 @@
 import {
+    Avatar,
     Flex,
     Heading,
     Menu,
     MenuButton,
     MenuItem,
     MenuList,
+    Stack,
+    Text,
 } from '@chakra-ui/react';
 import React from 'react';
 // import { HiMenuAlt3 } from 'react-icons/hi';
@@ -15,14 +18,7 @@ import { useAuth } from '../../context/auth';
 
 const Header: React.FC = () => {
     const { user, logout } = useAuth();
-
     const router = useRouter();
-
-    // const handleLogout = () => {
-    //     localStorage.removeItem('token');
-    //     setIsLogin(false);
-    //     router.push('/login');
-    // };
 
     return (
         <Flex
@@ -40,15 +36,29 @@ const Header: React.FC = () => {
             </Link>
             <Menu>
                 <Flex
-                    _hover={{ bgColor: 'primary.darker' }}
-                    width={8}
-                    height={8}
+                    _hover={{ bgGradient: 'linear(to-l, #FF0080, #7928CA)' }}
                     borderRadius={4}
                     justifyContent='center'
                     alignItems='center'
                 >
                     <MenuButton as='button'>
-                        <HamburgerIcon color='white' boxSize={8} />
+                        {user ? (
+                            <Stack
+                                direction={'row'}
+                                alignItems={'center'}
+                                px={2}
+                            >
+                                <Avatar
+                                    name={user.email.substring(0, 1)}
+                                    size={'sm'}
+                                />
+                                <Text fontSize={'md'} color='#fff'>
+                                    {user.email}
+                                </Text>
+                            </Stack>
+                        ) : (
+                            <HamburgerIcon color='white' boxSize={8} />
+                        )}
                     </MenuButton>
                 </Flex>
                 <MenuList>

@@ -2,7 +2,6 @@ import {
     Box,
     Button,
     FormControl,
-    FormHelperText,
     FormLabel,
     Heading,
     Highlight,
@@ -10,7 +9,15 @@ import {
     InputGroup,
     InputRightElement,
     Link,
+    Modal,
+    ModalBody,
+    ModalCloseButton,
+    ModalContent,
+    ModalHeader,
+    ModalOverlay,
     Stack,
+    Text,
+    useDisclosure,
 } from '@chakra-ui/react';
 import { NextPage } from 'next';
 import { FormEvent, useEffect, useState } from 'react';
@@ -18,12 +25,14 @@ import ButtonComponent from '../src/components/shared/Button';
 import HeadNext from '../src/components/shared/HeadNext';
 import Layout from '../src/layout';
 
+import Image from 'next/image';
+import { useRouter } from 'next/router';
 import githubLogo from '../public/assets/github-logo.png';
 import googleLogo from '../public/assets/google-logo.png';
-import Image from 'next/image';
-import { useAuth } from '../src/context/auth';
-import { useRouter } from 'next/router';
+import Alerts, { AlertProps } from '../src/components/shared/Alert';
 import { githubProvider, googleProvider } from '../src/config/firebase';
+import { useAuth } from '../src/context/auth';
+import { mapAuthCodeToMessage } from '../src/helper';
 
 interface UserTypes {
     email: string;
@@ -33,9 +42,17 @@ interface UserTypes {
 const Login: NextPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [inputs, setInputs] = useState({ email: '', password: '' });
+    const [contentAlert, setContentAlert] = useState<AlertProps>({
+        status: 'error',
+        title: '',
+        description: '',
+        isHidden: true,
+    });
 
-    const { signIn, user, signInWithProvider } = useAuth();
+    const { user, signIn, signInWithProvider } = useAuth();
     const router = useRouter();
+
+    const { isOpen, onOpen, onClose } = useDisclosure();
 
     useEffect(() => {
         if (user) router.push('/');
@@ -52,34 +69,117 @@ const Login: NextPage = () => {
     };
 
     const handleLogin = async ({ email, password }: UserTypes) => {
+        if (email === '' && password === '') {
+            return setContentAlert({
+                status: 'error',
+                title: 'Error: Empty Value!',
+                description: 'Please fill out the form!',
+                isHidden: false,
+            });
+        }
+
         try {
             await signIn(email, password);
-            router.push('/');
-        } catch (error) {
-            throw error;
+            setContentAlert({
+                ...contentAlert,
+                isHidden: true,
+            });
+        } catch (error: any) {
+            return setContentAlert({
+                status: 'error',
+                title: 'Error!',
+                description: mapAuthCodeToMessage(error.code),
+                isHidden: false,
+            });
         }
     };
 
     const handleLoginWithGoogle = async () => {
         try {
             await signInWithProvider(googleProvider);
-            router.push('/');
-        } catch (error) {
-            throw error;
+        } catch (error: any) {
+            return setContentAlert({
+                status: 'error',
+                title: 'Error!',
+                description: mapAuthCodeToMessage(error.code),
+                isHidden: false,
+            });
         }
     };
 
     const handleLoginWithGithub = async () => {
         try {
             await signInWithProvider(githubProvider);
-            router.push('/');
-        } catch (error) {
-            throw error;
+        } catch (error: any) {
+            return setContentAlert({
+                status: 'error',
+                title: 'Error!',
+                description: mapAuthCodeToMessage(error.code),
+                isHidden: false,
+            });
         }
     };
 
     return (
         <Layout>
+            {/* Modal */}
+            <Modal
+                blockScrollOnMount={false}
+                isOpen={isOpen}
+                onClose={onClose}
+                isCentered
+            >
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Login with SSO</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>
+                        <ButtonComponent
+                            rounded='lg'
+                            variant='primary'
+                            width='full'
+                            onClick={handleLoginWithGithub}
+                            my={2}
+                        >
+                            Login with Github{' '}
+                            <Box ml={2}>
+                                <Image
+                                    src={githubLogo}
+                                    width={20}
+                                    height={20}
+                                    alt='github-logo'
+                                />
+                            </Box>
+                        </ButtonComponent>
+                        <ButtonComponent
+                            rounded='lg'
+                            variant='primary'
+                            width='full'
+                            onClick={handleLoginWithGoogle}
+                            my={2}
+                        >
+                            Login with Google{' '}
+                            <Box ml={2}>
+                                <Image
+                                    src={googleLogo}
+                                    width={20}
+                                    height={20}
+                                    alt='google-logo'
+                                />
+                            </Box>
+                        </ButtonComponent>
+                    </ModalBody>
+                </ModalContent>
+            </Modal>
+            {/* End Modal */}
+
+            <Alerts
+                status={contentAlert.status}
+                title={contentAlert.title}
+                description={contentAlert.description}
+                isHidden={contentAlert.isHidden}
+            />
+
             <HeadNext title='Login' />
             <Heading size='lg' color={'#fff'} textAlign='center' my={10}>
                 <Highlight
@@ -94,7 +194,8 @@ const Login: NextPage = () => {
                     Welcome to Moveelix!
                 </Highlight>
             </Heading>
-            <Box>
+
+            <Box w={{ base: 'auto', md: 500 }} alignItems='center' mx={'auto'}>
                 <form
                     onSubmit={(e: FormEvent) => {
                         e.preventDefault();
@@ -136,9 +237,6 @@ const Login: NextPage = () => {
                                     </Button>
                                 </InputRightElement>
                             </InputGroup>
-                            <FormHelperText textAlign='right'>
-                                <Link>forgot password?</Link>
-                            </FormHelperText>
                         </FormControl>
                         <ButtonComponent
                             rounded='lg'
@@ -152,34 +250,14 @@ const Login: NextPage = () => {
                             rounded='lg'
                             variant='primary'
                             width='full'
-                            onClick={handleLoginWithGithub}
+                            onClick={onOpen}
                         >
-                            Login with Github{' '}
-                            <Box ml={2}>
-                                <Image
-                                    src={githubLogo}
-                                    width={20}
-                                    height={20}
-                                    alt='github-logo'
-                                />
-                            </Box>
+                            Login with SSO
                         </ButtonComponent>
-                        <ButtonComponent
-                            rounded='lg'
-                            variant='primary'
-                            width='full'
-                            onClick={handleLoginWithGoogle}
-                        >
-                            Login with Google{' '}
-                            <Box ml={2}>
-                                <Image
-                                    src={googleLogo}
-                                    width={20}
-                                    height={20}
-                                    alt='google-logo'
-                                />
-                            </Box>
-                        </ButtonComponent>
+                        <Text textAlign={'center'}>
+                            {' '}
+                            Didn't have account yet?
+                        </Text>
                         <Link
                             href='/register'
                             _hover={{ textDecoration: 'none' }}

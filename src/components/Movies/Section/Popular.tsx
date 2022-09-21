@@ -4,7 +4,7 @@ import { movieService } from '../../../services/movie';
 import CardSkeleton from '../../shared/Loading/Loading';
 import MovieSectionWrapper from '../MoviesWrapper';
 
-const PopularMovies = () => {
+const PopularMovies = ({ allMovies = false }: { allMovies?: boolean }) => {
     const { getPopularMovie } = movieService;
     const { isLoading, error, data } = useQuery(['popular'], () =>
         getPopularMovie()
@@ -15,7 +15,11 @@ const PopularMovies = () => {
     return (
         <>
             <MovieSectionWrapper title='Popular'>
-                <GridTemplate data={data?.results} pathMore='/' />
+                <GridTemplate
+                    data={data?.results}
+                    path='popular'
+                    showAll={allMovies}
+                />
             </MovieSectionWrapper>
         </>
     );

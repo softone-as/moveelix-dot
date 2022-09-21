@@ -2,7 +2,6 @@ import {
     Box,
     Button,
     FormControl,
-    FormHelperText,
     FormLabel,
     Heading,
     Highlight,
@@ -18,11 +17,10 @@ import ButtonComponent from '../src/components/shared/Button';
 import HeadNext from '../src/components/shared/HeadNext';
 import Layout from '../src/layout';
 
-import Image from 'next/image';
 import { useRouter } from 'next/router';
-import githubLogo from '../public/assets/github-logo.png';
-import googleLogo from '../public/assets/google-logo.png';
 import { useAuth } from '../src/context/auth';
+import Alerts, { AlertProps } from '../src/components/shared/Alert';
+import { mapAuthCodeToMessage } from '../src/helper';
 
 interface UserTypes {
     email: string;
@@ -32,6 +30,12 @@ interface UserTypes {
 const SignUp: NextPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [inputs, setInputs] = useState({ email: '', password: '' });
+    const [contentAlert, setContentAlert] = useState<AlertProps>({
+        status: 'error',
+        title: '',
+        description: '',
+        isHidden: true,
+    });
 
     const { signUp, user } = useAuth();
     const router = useRouter();
@@ -50,17 +54,38 @@ const SignUp: NextPage = () => {
         }));
     };
 
-    const handleLogin = async ({ email, password }: UserTypes) => {
+    const handleRegister = async ({ email, password }: UserTypes) => {
+        if (email === '' && password === '') {
+            return setContentAlert({
+                status: 'error',
+                title: 'Error: Empty Value!',
+                description: 'Please fill out the form!',
+                isHidden: false,
+            });
+        }
+
         try {
             await signUp(email, password);
-            router.push('/');
-        } catch (error) {
-            throw error;
+        } catch (error: any) {
+            return setContentAlert({
+                status: 'error',
+                title: 'Error!',
+                description: mapAuthCodeToMessage(error.code),
+                isHidden: false,
+            });
         }
     };
 
     return (
         <Layout>
+            {/* Alerts */}
+            <Alerts
+                status={contentAlert.status}
+                title={contentAlert.title}
+                description={contentAlert.description}
+                isHidden={contentAlert.isHidden}
+            />
+
             <HeadNext title='Register' />
             <Heading size='lg' color={'#fff'} textAlign='center' my={10}>
                 <Highlight
@@ -75,11 +100,12 @@ const SignUp: NextPage = () => {
                     Join with us in Moveelix!
                 </Highlight>
             </Heading>
-            <Box>
+
+            <Box w={{ base: 'auto', md: 500 }} alignItems='center' mx={'auto'}>
                 <form
                     onSubmit={(e: FormEvent) => {
                         e.preventDefault();
-                        handleLogin(inputs);
+                        handleRegister(inputs);
                     }}
                 >
                     <Stack
@@ -98,7 +124,7 @@ const SignUp: NextPage = () => {
                                 onChange={(e) => handleChange(e)}
                             />
                         </FormControl>
-                        <FormControl>
+                        <FormControl mb={6}>
                             <FormLabel>Password</FormLabel>
                             <InputGroup>
                                 <Input
@@ -117,9 +143,6 @@ const SignUp: NextPage = () => {
                                     </Button>
                                 </InputRightElement>
                             </InputGroup>
-                            <FormHelperText textAlign='right'>
-                                <Link>forgot password?</Link>
-                            </FormHelperText>
                         </FormControl>
                         <ButtonComponent
                             rounded='lg'
@@ -129,7 +152,7 @@ const SignUp: NextPage = () => {
                         >
                             Register
                         </ButtonComponent>
-                        <Link href='/Login' _hover={{ textDecoration: 'none' }}>
+                        <Link href='/login' _hover={{ textDecoration: 'none' }}>
                             <ButtonComponent
                                 rounded='lg'
                                 variant='secondary'

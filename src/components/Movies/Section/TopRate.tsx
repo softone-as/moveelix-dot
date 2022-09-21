@@ -4,7 +4,7 @@ import { movieService } from '../../../services/movie';
 import Loading from '../../shared/Loading/Loading';
 import MovieSectionWrapper from '../MoviesWrapper';
 
-const TopRateMovies = () => {
+const TopRateMovies = ({ allMovies = false }: { allMovies?: boolean }) => {
     const { getUpcomingMovie } = movieService;
     const { isLoading, error, data } = useQuery(['topRated'], () =>
         getUpcomingMovie()
@@ -15,7 +15,11 @@ const TopRateMovies = () => {
     return (
         <>
             <MovieSectionWrapper title='Top Rate'>
-                <GridTemplate data={data?.results} pathMore='/' />
+                <GridTemplate
+                    data={data?.results}
+                    path='top-rated'
+                    showAll={allMovies}
+                />
             </MovieSectionWrapper>
         </>
     );
